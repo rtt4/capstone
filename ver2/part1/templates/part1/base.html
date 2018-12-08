@@ -1,0 +1,29 @@
+{% load static %}
+<html>
+<head>
+    <title>PSAS</title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <link href='//fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+    <script language="javascript" type="text/javascript" src="{% static 'js/AIRIntrospector.js' %}"></script>
+    <script language="javascript" type="text/javascript" src="{% static 'js/AIRAliases.js' %}"></script>
+    <script language="javascript" type="text/javascript" src="{% static 'js/imgmap_packed.js' %}"></script>
+    <script language="javascript" type="text/javascript" src="{% static 'js/default_interface2.js' %}"></script>
+
+</head>
+<body>
+<div class="page-header">
+    <h1><a href="/">Paper Survey Aggregation Service</a></h1>
+</div>
+<div class="content container">
+    <div class="row">
+        <div class="col-md-8">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+{% extends 'part1/base.html' %}
+{% block content %}
+<body>
+<!--<li><a href="{{ meat.survey.url }}">{{ meta.survey.name }} </li>-->
+
+<!-- List of uploaded documents -->
+{% if documents %}
+<ul>
+    {% for document in documents %}
+    <li><a href="{{ document.docfile.url }}">{{ document.docfile.name }}</a></li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No documents.</p>
+{% endif %}
+
+<!-- Upload form. Note enctype attribute! -->
+<form action="{% url 'p2' %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <p>{{ form.non_field_errors }}</p>
+    <p>
+        {{ form.survey.errors }}
+        {{ form.survey }}
+    </p>
+    <p><input type="submit" value="Upload"/></p>
+</form>
+
+<p></p><a href=" {% url 'p0' %}">back to p0</a></p>
+<p><a href=" {% url 'p5' %}">Test page</a></p>
+</body>
+{% endblock%}

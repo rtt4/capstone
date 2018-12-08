@@ -1,0 +1,17 @@
+{% extends 'part1/base.html' %}
+
+{% block content %}
+{% load staticfiles %}
+
+<!-- Upload form. Note enctype attribute! -->
+<fieldset>
+    <form action="{% url 'p1' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <!--<input type="file" name="file_upload">-->
+        <div id="form_survey">{{ form.survey }}</div>
+        <div id="form_data">{{ form.data }}</div>
+        <input type="submit" value="Upload"/>
+    </form>
+</fieldset>
+
+{% endblock %}
