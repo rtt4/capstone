@@ -3,18 +3,18 @@ import cv2
 import ast
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-
+import matplotlib.pyplot as plts
+import os
 
 class Preprocessor:
 
-    def __init__(self, meta_data, survey_original, survey_test, fixed_width=3 * 210, fixed_height=3 * 297):
+    def __init__(self, survey_original=None, survey_test=None, meta_data=None,
+                 fixed_width=3 * 210, fixed_height=3 * 297):
+        app_root_path = r"C:\pyproject\capstone\ver2"
         self.fixed_width = fixed_width
         self.fixed_height = fixed_height
-        self.survey_original = cv2.imread(survey_original)
-        self.survey_test = [cv2.imread(filename) for filename in survey_test]
-        self.survey_original = self.img_resize(self.survey_original, ratio=0.99)
-        self.survey_test = [self.img_resize(test, ratio=0.97) for test in self.survey_test]
+        self.survey_original = None
+        self.survey_test = None
         self.block_dict = dict()
         self.questions = dict()
         self.test_questions_list = list()
@@ -22,7 +22,40 @@ class Preprocessor:
         self.question_square_list = list()
         self.questions_list = list()
         self.questions_text_list = list()
-        self.parse_search_space(meta_data)
+
+        if survey_original is not None:
+            self.load_original(survey_original)
+            ocr_ori = os.path.join(app_root_path, "ocr_ori.jpg")
+            cv2.imwrite(ocr_ori, self.survey_original)
+        if survey_test is not None:
+            self.load_test(survey_test)
+        if meta_data is not None:
+            self.parse_search_space(meta_data)
+
+    def load_original(self, survey_original):
+        self.survey_original = cv2.imread(survey_original)
+        self.survey_original = self.img_resize(self.survey_original, ratio=0.99)
+
+    def load_test(self, survey_test):
+        self.survey_test = [cv2.imread(filename) for filename in survey_test]
+        self.survey_test = [self.img_resize(test, ratio=0.97) for test in self.survey_test]
+
+    def debug(self):
+        ori = self.survey_original.copy()
+        tst = self.survey_test[0].copy()
+        for xl, xh, yl, yh in self.question_square_list:
+            w = xh - xl
+            h = yh - yl
+            ori = cv2.rectangle(ori, (xl, yl), (xl + w, yl + h), (255, 0, 0), 2)
+        for xl, xh, yl, yh in self.query_square_list:
+            w = xh - xl
+            h = yh - yl
+            ori = cv2.rectangle(ori, (xl, yl), (xl + w, yl + h), (0, 0, 255), 2)
+        cv2.imshow("debug_ori", ori)
+        cv2.imshow("debug_tst", tst)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+        self.img_blending()
 
     def parse_search_space(self, filename):
         with open(filename, "r") as f:
@@ -164,10 +197,10 @@ class Preprocessor:
 
         roi1 = th1[y:y+h, x: x + w]
         roi2 = th2[y_begin: y_end, x_begin:x_end]
-        #cv2.imshow("1", roi1)
-        #cv2.imshow("2", roi2)
-        #cv2.waitKey(0)
-        #cv2.destroyAllWindows()
+        cv2.imshow("1", roi1)
+        cv2.imshow("2", roi2)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
         flag = True
         xpos = None
@@ -211,10 +244,10 @@ class Preprocessor:
         y_begin = ypos
         y_end = ypos + h
         roi2 = th2[y_begin: y_end, x_begin:x_end]
-        #cv2.imshow("1", roi1)
-        #cv2.imshow("2", roi2)
-        #cv2.waitKey(0)
-        #cv2.destroyAllWindows()
+        cv2.imshow("1", roi1)
+        cv2.imshow("2", roi2)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
         return xpos - x, ypos - y
 
     def draw_figure(self, x1, y1, x2, y2, w, h, th1, th2):
@@ -298,7 +331,7 @@ class Preprocessor:
 
     def noise_elimination(self, diff, img, test_num, q_num):
         kernel = np.ones((2, 2), np.uint8)
-        diff = cv2.morphologyEx(diff, cv2.MORPH_OPEN, kernel, iterations=2)
+       # diff = cv2.morphologyEx(diff, cv2.MORPH_OPEN, kernel, iterations=2)
         self.test_questions_list.append(dict())
         rec = self.classification(diff, img, test_num, q_num)
         #diff = cv2.dilate(diff, kernel, iterations=1)
@@ -418,27 +451,15 @@ class Preprocessor:
     def load_original_survey_ocr(self, filepath):
         with open(filepath, "r", encoding="utf-8-sig") as f:
             js = f.read()
-
         data_list = json.loads(js)["data"]
         sentences = data_list[0]["text"].split("\n")
         data_list = data_list[1:]
-
         for idx, data in enumerate(data_list):
             yh = ast.literal_eval(data["bounds"][2])[1]
             yl = ast.literal_eval(data["bounds"][0])[1]
             xh = ast.literal_eval(data["bounds"][2])[0]
             xl = ast.literal_eval(data["bounds"][0])[0]
             self.query_square_list.append((xl, xh, yl, yh))
-
-        iimg = self.survey_original.copy()
-        for xx, yy, ww, hh in self.query_square_list:
-            iimg = cv2.rectangle(iimg, (xx, yy), (xx + ww, yy + hh), (255, 0, 0), 2)
-        for xx, yy, ww, hh in self.question_square_list:
-            iimg = cv2.rectangle(iimg, (xx, yy), (xx + ww, yy + hh), (0, 255, 0), 2)
-        cv2.imshow("iimg", iimg)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-
         for ele in self.questions_list:
             v = ele[1]
             yh = v["y"] + v["h"]
@@ -446,6 +467,7 @@ class Preprocessor:
             xh = v["x"] + v["w"]
             xl = v["x"]
             self.question_square_list.append((xl, xh, yl, yh))
+
         label = [-1] * len(self.query_square_list)
         for i in range(len(self.query_square_list)):
             maxi = 0
@@ -457,7 +479,7 @@ class Preprocessor:
                     maxi = temp
                     label[i] = j
 
-
+        self.debug()
 
         word_bag = [None] * len(self.questions_list)
         for i in range(len(self.query_square_list)):
@@ -468,7 +490,7 @@ class Preprocessor:
                 if word_bag[j] is None:
                     word_bag[j] = list()
                 word_bag[j].append(data_list[i]["text"])
-        print(word_bag)
+
         sent_idx = 0
         bag_idx = 0
 
@@ -484,4 +506,20 @@ class Preprocessor:
             sent_idx += 1
 
         for question in self.questions_list:
+            print(question)
             self.questions_text_list.append(question[1]["question"])
+
+
+if __name__ == "__main__":
+    app_root_path = r"C:\Users\inha\Desktop\Projects\capstone_proto"
+    meta_txt = r"tmp.txt"
+    ocr_file = r"OCR_result.json"
+    ori_jpg = r"ori.jpg"
+    tst_jpg = r"tst.jpg"
+    meta_txt = os.path.join(app_root_path, meta_txt)
+    ocr_file= os.path.join(app_root_path, ocr_file)
+    ori_jpg = os.path.join(app_root_path, ori_jpg)
+    tst_jpg = os.path.join(app_root_path, tst_jpg)
+    sp = Preprocessor(meta_txt, ori_jpg, [tst_jpg])
+    sp.load_original_survey_ocr(ocr_file)
+    sp.debug()

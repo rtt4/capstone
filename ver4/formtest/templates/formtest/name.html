@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form action="/your_name/" method="post">
+    <!--<label for="your_name">Your name: </label>-->
+    <!--<input id="your_name" type="text" name="your_name" value="{{ current_name }}">-->
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="OK">
+</form>
+</body>
+</html>
