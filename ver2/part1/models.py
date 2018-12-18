@@ -17,10 +17,6 @@ class MetaSurvey(models.Model):
     def __str__(self):
         return self.title
 
-    # resized_survey = models.ImageField(upload_to='resized_survey/%d', null=True, blank=True)
-    # resized_survey = models.ImageField(upload_to="resized_survey/%d", null=True, blank=True)
-    # resized_survey = ThumbnailImageField(upload_to='resized_survey/%d')
-
 class Unziped_data(models.Model):
     meta_survey = models.ForeignKey(MetaSurvey, on_delete=models.CASCADE)
     image = models.ImageField(upload_to="unzip/%d", null=True, blank=True)

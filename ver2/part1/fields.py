@@ -2,7 +2,6 @@ import os
 
 from django.db.models.fields.files import ImageField, ImageFieldFile
 from .my_module.Preprocessor import Preprocessor
-from PIL import Image
 import cv2
 
 def _add_thumb(s):
@@ -40,9 +39,4 @@ class ThumbnailImageField(ImageField):
 
     # 모델 필드 정의 시, 옵션 지정.
     def __init__(self, *args, **kwargs):
-    # def __init__(self, thumb_width=128, thumb_height=128, *args, **kwargs):
-        # self.thumb_width = thumb_width
-        # self.thumb_height = thumb_height
-
-        # 부모 ImageField 클래스 생성자 호출해서 관련 속성 초기화
         super(ThumbnailImageField, self).__init__(*args, **kwargs)
