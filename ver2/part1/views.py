@@ -3,14 +3,17 @@ import zipfile
 import cv2
 
 from django.shortcuts import render, get_object_or_404, redirect
+from django.template import Context, loader
+
 from .models import MetaSurvey
 from .forms import SurveyForm
 from django.views.generic import View
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.urls import reverse
 from .my_module.Preprocessor import Preprocessor
 from .my_module.my_ocr_module import detect_text
+from django.core.files import File
 
 import cv2
 
@@ -146,6 +149,9 @@ def p4(request):
 #     post = get_object_or_404(MetaSurvey, pk=pk)
 #     # return redirect(reverse('part1/p5.html', kwargs={'pk': post.id}))
 #     return render(request, 'part1/p5.html', { 'post': post })
+import os
+from django.conf import settings
+from django.http import HttpResponse
 
 def p5(request):
     # app_root_path = r"C:\pyproject\capstone\ver2"
@@ -159,34 +165,28 @@ def p5(request):
     print('test_survey: ', test_survey)
 
     # unzip
-    # test_list = []
-    # with zipfile.ZipFile(test_survey, 'r') as zip_ref:
-    #     new_dir = test_survey + temp.data.__str__()
-    #     new_dir = new_dir.split(".")[0]
-    #     print('new_dir:', new_dir)
-    #     if not os.path.exists(new_dir):
-    #         os.makedirs(new_dir)
-    #
-    #     zip_ref.extractall(new_dir)
-    #
-    #     filenames = os.listdir(new_dir)
-    #     for filename in filenames:
-    #         filename = os.path.join(new_dir, filename)
-    #         test_list.append(filename)
-    #
-    # # list 'test_file' 출력해서 확인
-    # print('type: ', type(test_list))
-    # for test_file in test_list:
-    #     print(type(test_file), ', test_file: ', test_file)
+    test_list = []
+    with zipfile.ZipFile(test_survey, 'r') as zip_ref:
+        new_dir = test_survey + temp.data.__str__()
+        new_dir = new_dir.split(".")[0]
+        print('new_dir:', new_dir)
+        if not os.path.exists(new_dir):
+            os.makedirs(new_dir)
 
-    test_img = cv2.imread(test_survey)
-    cv2.imshow('test', test_img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+        zip_ref.extractall(new_dir)
 
-    sp = Preprocessor(origianl_survey, [test_survey], meta)
-    # sp = Preprocessor(meta, origianl_survey, [test_list])
-    # sp = Preprocessor(meta, origianl_survey, test_list)
+        filenames = os.listdir(new_dir)
+        for filename in filenames:
+            filename = os.path.join(new_dir, filename)
+            test_list.append(filename)
+
+    # list 'test_file' 출력해서 확인
+    print('type: ', type(test_list))
+    for test_file in test_list:
+        print(type(test_file), ', test_file: ', test_file)
+
+    # sp = Preprocessor(origianl_survey, [test_survey], meta)
+    sp = Preprocessor(origianl_survey, test_list, meta)
 
     ocr_json_path = os.path.join(app_root_path, "OCR_result.json")
     ocr_ori = os.path.join(app_root_path, "ocr_ori.jpg")
@@ -198,4 +198,16 @@ def p5(request):
     csv_filename = os.path.join(app_root_path, "result_csv.csv")
     sp.print_answers(0)
     sp.make_csv(csv_filename)
-    return render(request, 'part1/p5.html', {})
+
+    print('csv_filename: ', csv_filename)
+    return render(request, 'part1/p5.html', {'csv_path':csv_filename})
+
+
+def download(request):
+    path = "../ver2/result_csv.csv"
+    if os.path.exists(path):
+        with open(path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/vnd.ms-excel")
+            response['Content-Disposition'] = 'inline; filename=' + os.path.basename(path)
+            return response
+    raise Http404

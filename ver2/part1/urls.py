@@ -1,4 +1,6 @@
 from django.conf.urls import url
+from django.urls import path
+
 from . import views
 
 urlpatterns = [
@@ -9,4 +11,6 @@ urlpatterns = [
     url(r'^p4/$', views.p4, name='p4'),
     # url(r'^p5/(?P<pk>\d+)/$', views.p5, name='p5'),
     url(r'^p5/$', views.p5, name='p5'),
+    # url(r'^download/$', views.download, name='download'),
+    path('download/', views.download, name='download')
 ]
