@@ -21,12 +21,13 @@ class Album(models.Model):
 
 class Photo(models.Model):
     album = models.ForeignKey(Album, on_delete=models.CASCADE)
+
     title = models.CharField(max_length=50)
-    image = ThumbnailImageField(upload_to='photo/%Y/%m')
-    description = models.TextField('Photo Description', blank=True)
+    image = ThumbnailImageField(upload_to='survey/%Y/%m')
+    data = models.FileField(upload_to="data/%d", null=True, blank=True)
+
     upload_date = models.DateTimeField('Upload Date', auto_now_add=True)
 
-    #7
     class Meta:
         ordering = ['title']
 

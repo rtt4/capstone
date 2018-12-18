@@ -1,9 +1,14 @@
 from django.urls import path
+from django.conf.urls import url
 
 from .views import *
+from . import views
 
 app_name = 'photo'
 urlpatterns = [
+
+    url(r'^p5/$', views.p5, name='p5'),
+
     # Example: /
     path('', AlbumLV.as_view(), name='index'),
 
@@ -19,6 +24,11 @@ urlpatterns = [
     # Example: /album/add/
     path('album/add/', AlbumPhotoCV.as_view(), name="album_add",),
 
+    # Example: /photo/add/
+    path('photo/add/', PhotoCreateView.as_view(), name="photo_add",),
+
+
+    # 1차적으로 필요없는 부분
     # Example: /album/change/
     path('album/change/', AlbumChangeLV.as_view(), name="album_change",),
 
@@ -28,8 +38,6 @@ urlpatterns = [
     # Example: /album/99/delete/
     path('album/<int:pk>/delete/', AlbumDeleteView.as_view(), name="album_delete",),
 
-    # Example: /photo/add/
-    path('photo/add/', PhotoCreateView.as_view(), name="photo_add",),
 
     # Example: /photo/change/
     path('photo/change/', PhotoChangeLV.as_view(), name="photo_change",),

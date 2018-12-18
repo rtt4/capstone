@@ -2,36 +2,73 @@ import os
 import zipfile
 import cv2
 
-from .models import MetaSurvey
 from django.shortcuts import render, get_object_or_404, redirect
+from .models import MetaSurvey
 from .forms import SurveyForm
+from django.views.generic import View
+
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from .my_module.Preprocessor import Preprocessor
 from .my_module.my_ocr_module import detect_text
+
+import cv2
 
 def resizing_image(datapath):   #컴퓨터의 경로, 반환값은 이미지 데이터
     raise NotImplemented
 
 
 # Create your views here.
+
+# class MyFormView(View):
+#     form_class = MyFormView
+#     initial = {'key':'value'}
+#     template_name = 'form_template.html'
+#     # success_url = '/thanks/'
+#
+#     def get(self, request, *args, **kwargs):
+#         form = self.form_class(initital=self.initial)
+#         return render(request, self.template_name, {'form': form})
+#
+#     def post(self, request, *args, **kwargs):
+#         form = self.form_class(request.POST)
+#         if form.is_valid():
+#             return HttpResponseRedirect('/success/')
+#
+#         return render(request, self.template_name, {'form':form})
+
+
+
+
 def p0(request):
     form = SurveyForm()
     return render(request, 'part1/p0.html', {'form': form})
 
 def p1(request):
     if request.method == "POST":
+        newFile = MetaSurvey(title= request.POST['title'], survey=request.FILES['survey'], data=request.FILES['data'], resized_survey=request.FILES['survey'])
+        newFile.save()  # 데이터베이스에 저장. table 이름 MetaSurvey
 
-        # resize
+        my_file = newFile
+        # print(my_file.pk)
+
+        # if form.is_valid():
+        #     print("form: ", form.cleaned_data)
+        #     # form.save()
+        #     my_file = form
+        # else:
+        #     print('invalid')
+
+        # resize는 이제 fields.py에서
         # sp = Preprocessor()
         # sp.load_original(request.FILES['survey'])   # 현재 디비에 저장되지 않은 상태의 이미지. 경로가 아니라 오류날 것 같음.
         # resized_img = sp.survey_original
         # newFile = MetaSurvey(survey=request.FILES['survey'], data=request.FILES['data'], resized_survey=resized_img)
 
-        newFile = MetaSurvey(survey=request.FILES['survey'], data=request.FILES['data'])
-        newFile.save()  # 데이터베이스에 저장. table 이름 MetaSurvey
+        # newFile = MetaSurvey(survey=request.FILES['survey'], data=request.FILES['data'])
+        # newFile.save()  # 데이터베이스에 저장. table 이름 MetaSurvey
 
-        my_file = newFile
+        # my_file = newFile
 
         # unzip된 파일들을 meta survey와 분석작업을 진행.
 
@@ -50,6 +87,7 @@ def p1(request):
         # Model.objects.filter(id=param_dict['id']).update(**param_dict['Model'])
 
         return render(request, 'part1/p1.html', {'my_file': my_file})
+
     else:
         myDict = dict(request.GET)
         active_list = ['img_id', 'img_target', 'img_alt', 'img_coords']
@@ -65,6 +103,8 @@ def p1(request):
             f.writelines(tmp_str)
         f.close()
         return redirect('p5')
+
+
 
 # def p2(request, pk):
 def p2(request):
@@ -138,7 +178,13 @@ def p5(request):
     # print('type: ', type(test_list))
     # for test_file in test_list:
     #     print(type(test_file), ', test_file: ', test_file)
-    sp = Preprocessor(meta, origianl_survey, [test_survey])
+
+    test_img = cv2.imread(test_survey)
+    cv2.imshow('test', test_img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+    sp = Preprocessor(origianl_survey, [test_survey], meta)
     # sp = Preprocessor(meta, origianl_survey, [test_list])
     # sp = Preprocessor(meta, origianl_survey, test_list)
 
@@ -153,52 +199,3 @@ def p5(request):
     sp.print_answers(0)
     sp.make_csv(csv_filename)
     return render(request, 'part1/p5.html', {})
-
-# def post_list(request):
-#     posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('published_date')
-#     return render(request, 'blog/post_list.html', {'posts': posts})
-
-# def post_detail(request, pk):
-#     post = get_object_or_404(Post, pk=pk)
-#     return render(request, 'blog/post_detail.html', {'post': post})
-#
-# def post_new(request):
-#     if request.method == "POST":
-#         form = PostForm(request.POST)
-#         if form.is_valid():
-#             post = form.save(commit=False)
-#             post.author = request.user
-#             # post.published_date = timezone.now()
-#             post.save()
-#             return redirect('post_detail', pk=post.pk)
-#     else:
-#         form = PostForm()
-#     return render(request, 'blog/post_edit.html', {'form': form})
-#
-# def post_edit(request, pk):
-#     post = get_object_or_404(Post, pk=pk)
-#     if request.method == "POST":
-#         form = PostForm(request.POST, instance=post)
-#         if form.is_valid():
-#             post = form.save(commit=False)
-#             post.author = request.user
-#             # post.published_date = timezone.now()
-#             post.save()
-#             return redirect('post_detail', pk=post.pk)
-#     else:
-#         form = PostForm(instance=post)
-#     return render(request, 'blog/post_edit.html', {'form': form})
-#
-# def post_draft_list(request):
-#     posts = Post.objects.filter(published_date__isnull=True).order_by('created_date')
-#     return render(request, 'blog/post_draft_list.html', {'posts': posts})
-#
-# def post_publish(request, pk):
-#     post = get_object_or_404(Post, pk=pk)
-#     post.publish()
-#     return redirect('post_detail', pk=pk)
-#
-# def post_remove(request, pk):
-#     post = get_object_or_404(Post, pk=pk)
-#     post.delete()
-#     return redirect('post_list')

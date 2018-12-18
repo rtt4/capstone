@@ -43,13 +43,13 @@
         {{ form.id }}
     <fieldset class="aligned">
         <div class="form-row">
-            {{ form.image.label_tag }} {{ form.image }}
-        </div>
-        <div class="form-row">
             {{ form.title.label_tag }} {{ form.title }}
         </div>
         <div class="form-row">
-            {{ form.description.label_tag }} {{ form.description }}
+            {{ form.image.label_tag }} {{ form.image }}
+        </div>
+        <div class="form-row">
+            {{ form.data.label_tag }} {{ form.data }}
         </div>
     </fieldset>
     {% endfor %}

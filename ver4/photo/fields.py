@@ -6,7 +6,7 @@ from PIL import Image
 # 212페이지
 def _add_thumb(s):  # 기존 파일명을 기준으로 썸네일 이미지 파일명 만든다.
     parts = s.split(".")
-    parts.insert(-1, "thumb")
+    parts.insert(-1, "resized")
     if parts[-1].lower() not in ['jpeg', 'jpg']:
         parts[-1] = 'jpg'
     return ".".join(parts)
@@ -46,7 +46,5 @@ class ThumbnailImageFieldFile(ImageFieldFile):  # 파일 시스템에 직접 파
 class ThumbnailImageField(ImageField):  # 장고 모델 정의에 사용되는 필드 역할.
     attr_class = ThumbnailImageFieldFile    # 새로운 FileField 클래스를 정의할 때 그에 상응하는 File 처리 클래스를 attr_class 속성에 지정하는 것이 필수.(ThumbnailImageFieldFile)
 
-    def __init__(self, thumb_width=128, thumb_height=128, *args, **kwargs):
-        self.thumb_width = thumb_width
-        self.thumb_height = thumb_height
+    def __init__(self, *args, **kwargs):
         super(ThumbnailImageField, self).__init__(*args, **kwargs)  # 부모 ImageField 클래스의 생성자 호출, 관련 속성 초기화.

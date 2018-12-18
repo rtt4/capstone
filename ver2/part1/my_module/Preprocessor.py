@@ -64,6 +64,7 @@ class Preprocessor:
         for line in data:
             line = line.strip()
             a_list = line.split(" ")
+            print(a_list)
             idx = int(a_list[0])
             btype = int(a_list[1])
             if btype == 0 or btype == 3:
@@ -331,7 +332,7 @@ class Preprocessor:
 
     def noise_elimination(self, diff, img, test_num, q_num):
         kernel = np.ones((2, 2), np.uint8)
-       # diff = cv2.morphologyEx(diff, cv2.MORPH_OPEN, kernel, iterations=2)
+        diff = cv2.morphologyEx(diff, cv2.MORPH_OPEN, kernel, iterations=2)
         self.test_questions_list.append(dict())
         rec = self.classification(diff, img, test_num, q_num)
         #diff = cv2.dilate(diff, kernel, iterations=1)

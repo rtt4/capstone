@@ -7,9 +7,9 @@
 <fieldset>
     <form action="{% url 'p1' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <!--<input type="file" name="file_upload">-->
-        <div id="form_survey">{{ form.survey }}</div>
-        <div id="form_data">{{ form.data }}</div>
+        <div class="form-row">{{ form.title.label_tag }} {{ form.title }}</div>
+        <div class="form-row">{{ form.survey.label_tag }} {{ form.survey }}</div>
+        <div class="form-row">{{ form.data.label_tag }} {{ form.data }}</div>
         <input type="submit" value="Upload"/>
     </form>
 </fieldset>
