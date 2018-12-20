@@ -6,7 +6,7 @@
 <form id="img_area_form">
     <fieldset>
         <legend>
-            <a onclick="toggleFieldset(this.parentNode.parentNode)">Select source</a>
+            <h3><a onclick="toggleFieldset(this.parentNode.parentNode)">Select source</a></h3>
         </legend>
         <!-- List of uploaded documents -->
         {% if my_file %}
@@ -21,9 +21,9 @@
             <!--<div class="source_desc">Use an image on your computer:</div>-->
             <div class="source_url">
                 <div style="font: 10px Arial;">
-                    <a href="javascript:gui_loadImage(document.getElementById('src').getAttribute('value'))" class="source_accept">accept</a>
+                    <a href="javascript:gui_loadImage(document.getElementById('src').getAttribute('value'))" class="btn btn-default">accept</a>
                     <div id="upload_result" style="display: none;">Uploaded
-                        <span id="src" value={{ my_file.survey.url }}> survey1.jpg의 사본.jpg </span>
+                        <span id="src" value={{ my_file.resized_survey.url }}> survey1.jpg의 사본.jpg </span>
                         - <a href="javascript:showForm()">upload another</a>
                     </div>
                 </div>
@@ -32,7 +32,7 @@
     </fieldset>
     <fieldset>
         <legend>
-            <a onclick="toggleFieldset(this.parentNode.parentNode)">Image map areas</a>
+            <h3><a onclick="toggleFieldset(this.parentNode.parentNode)">Image map areas</a></h3>
         </legend>
         <div style="border-bottom: solid 1px #efefef">
 
@@ -91,27 +91,25 @@
                 <!-- form elements come here -->
             </div>
 
-            <input type="submit" value="Upload"/>
+            <input type="submit" value="Upload" type="button" class="btn btn-success"/>
         </form>
 
     </fieldset>
     <fieldset>
         <legend>
-            <a onclick="toggleFieldset(this.parentNode.parentNode)">Image</a>
+            <h3><a onclick="toggleFieldset(this.parentNode.parentNode)">Image</a></h3>
         </legend>
         <div id="pic_container">
         </div>
         <fieldset>
             <legend>
-                <a onclick="toggleFieldset(this.parentNode.parentNode)">Status</a>
+                <h3><a onclick="toggleFieldset(this.parentNode.parentNode)">Status</a></h3>
             </legend>
             <div id="status_container"></div>
         </fieldset>
         <fieldset id="fieldset_html">
             <legend>
-                <a onclick="toggleFieldset(this.parentNode.parentNode)">Code
-
-                </a>
+                <h3><a onclick="toggleFieldset(this.parentNode.parentNode)">Code</a></h3>
             </legend>
             <div>
                 <div id="output_help"></div>

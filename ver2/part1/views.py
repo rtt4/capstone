@@ -1,5 +1,10 @@
 import zipfile
 import os
+import cv2
+
+from django.core.files import File
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.db.models.fields.files import FieldFile
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from .models import MetaSurvey
@@ -8,17 +13,91 @@ from django.http import Http404
 from .my_module.Preprocessor import Preprocessor
 from .my_module.my_ocr_module import detect_text
 
+import scipy.misc   # https://stackoverflow.com/questions/902761/saving-a-numpy-array-as-an-image
+
+from django.conf import settings
+
 # Create your views here.
 def p0(request):
     form = SurveyForm()
     return render(request, 'part1/p0.html', {'form': form})
 
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.conf import settings
+
+
 def p1(request):
     if request.method == "POST":
-        newFile = MetaSurvey(title= request.POST['title'], survey=request.FILES['survey'], data=request.FILES['data'], resized_survey=request.FILES['survey'])
-        newFile.save()  # 데이터베이스에 저장.
-        my_file = newFile
-        return render(request, 'part1/p1.html', {'my_file': my_file})
+        # newFile = MetaSurvey(title= request.POST['title'], survey=request.FILES['survey'], data=request.FILES['data'], resized_survey=request.FILES['survey'])
+
+
+        #1 save in-memory file
+        survey_path = os.path.join(settings.MEDIA_ROOT, "survey")
+        f = request.FILES['survey']
+        print('type(f): ', type(f))
+        # f_path = os.path.join(settings.MEDIA_ROOT, default_storage.save('temp_resized_survey.jpeg', ContentFile(f.read())))
+        # print('f_path: ', f_path)
+
+        # 동일한 이름의 파일이 있는 경우엔 어떻게 처리?
+        # f = os.path.join(survey_path, 'temp_resized_survey.jpeg')
+        # if not os.path.is_file(f):
+        #     os.path.join(settings.MEDIA_ROOT, default_storage.save('temp_resized_survey.jpeg', ContentFile(f.read())) )
+
+        # sp = Preprocessor()
+        # sp.load_original(f_path)
+        # resized_img = sp.survey_original
+        # cv2.imwrite(f_path, resized_img)
+        # print('type: ', type(resized_img))  # <class 'numpy.ndarray'>
+        # temp_path = os.path.join(settings.MEDIA_ROOT, 'resized_survey.jpeg')
+        # scipy.misc.imsave(temp_path, resized_img)
+
+
+        #2 after saving, parsing the ~resized.jpeg file
+        form = MetaSurvey(title=request.POST['title'], survey=request.FILES['survey'], data=request.FILES['data'])
+        form.save() # 데이터베이스에 저장한 뒤에야 ~resized.jpeg 파일이 생성된다. => 디비에 따로 저장해야 p1에서 사용.
+        print('pk: ', form.pk)
+
+        # form = SurveyForm(request.POST, request.FILES)
+        # form = form.save(commit=False)
+
+        print(form.survey.name.split("/"))
+        survey_file_name = form.survey.name.split("/")[-1]
+
+        file_path = survey_file_name.split(".")
+        file_path.insert(-1, "resize")
+        file_path = ".".join(file_path)
+
+        print('survey_path: ', survey_path)
+        # print('file_path, before: ', file_path)
+        file_path = os.path.join(survey_path, file_path)
+        print('file_path, after: ', file_path)
+
+        f = open(file_path, 'rb')
+        print('size of f: ', os.path.getsize(file_path))
+        djangofile = File(f)
+        form.resized_survey.save('resized_survey.jpeg', djangofile)
+        f.close()
+        print('form type: ', type(form))
+
+        # error: context must be a dict rather than set.
+
+        # field = FieldFile(f, MetaSurvey.resized_survey, MetaSurvey.resized_survey.name)
+        # print(field)
+        # print('type: ', field)
+        # resized_survey_file = InMemoryUploadedFile(f, MetaSurvey.resized_survey.name, 'resized_survey_file', "JPEG", None, os.path.getsize(file_path))
+
+        # form.resized_survey = resized_survey_file
+        # form = MetaSurvey(title=request.POST['title'], survey=request.FILES['survey'], data=request.FILES['data'], resized_survey=resized_survey_file)
+        # form = MetaSurvey.objects.get(pk=form.pk)
+        # form.delete()
+        # form.resized_survey=resized_survey_file
+        # form.save()  # 데이터베이스에 저장.
+
+        context = {'my_file': form,}
+
+        my_file = form
+        return render(request, 'part1/p1.html', context)
     else:
         myDict = dict(request.GET)
         active_list = ['img_id', 'img_target', 'img_alt', 'img_coords']

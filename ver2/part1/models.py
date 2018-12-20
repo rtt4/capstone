@@ -5,10 +5,10 @@ from django.utils.timezone import now
 # Create your models here.
 class MetaSurvey(models.Model):
     title = models.CharField(max_length=50)
-    survey = ThumbnailImageField(upload_to='survey/%Y/%m')
+    survey = ThumbnailImageField(upload_to='survey/')
     data = models.FileField(upload_to="data/%d", null=True, blank=True)
 
-    resized_survey = models.ImageField(upload_to='resized_survey/%d', null=True, blank=True)
+    resized_survey = models.ImageField(upload_to='resized_survey/', null=True, blank=True)
     upload_date = models.DateTimeField('Upload Date', auto_now_add=True)
 
     class Meta:

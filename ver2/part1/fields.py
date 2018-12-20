@@ -1,8 +1,13 @@
 import os
 
+from django.core.files import File
 from django.db.models.fields.files import ImageField, ImageFieldFile
+
 from .my_module.Preprocessor import Preprocessor
 import cv2
+
+# https://stackoverflow.com/questions/902761/saving-a-numpy-array-as-an-image
+import scipy.misc
 
 def _add_thumb(s):
     parts = s.split(".")
@@ -22,11 +27,16 @@ class ThumbnailImageFieldFile(ImageFieldFile):
 
     def save(self, name, content, save=True):
         super(ThumbnailImageFieldFile, self).save(name, content, save)
+        print('save in fields')
+
         # resize
         sp = Preprocessor()
         sp.load_original(self.path)
         resized_img = sp.survey_original
         cv2.imwrite(self.thumb_path, resized_img)
+        print('type: ', type(resized_img))  # <class 'numpy.ndarray'>
+
+        scipy.misc.imsave(self.thumb_path, resized_img)
 
     def delete(self, save=True):
         if os.path.exists(self.thumb_path):
