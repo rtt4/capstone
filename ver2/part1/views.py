@@ -1,10 +1,7 @@
 import zipfile
 import os
-import cv2
-
+from django.conf import settings
 from django.core.files import File
-from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.db.models.fields.files import FieldFile
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from .models import MetaSurvey
@@ -13,24 +10,15 @@ from django.http import Http404
 from .my_module.Preprocessor import Preprocessor
 from .my_module.my_ocr_module import detect_text
 
-import scipy.misc   # https://stackoverflow.com/questions/902761/saving-a-numpy-array-as-an-image
-
-from django.conf import settings
-
 # Create your views here.
 def p0(request):
     form = SurveyForm()
     return render(request, 'part1/p0.html', {'form': form})
 
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-from django.conf import settings
-
 
 def p1(request):
     if request.method == "POST":
         # newFile = MetaSurvey(title= request.POST['title'], survey=request.FILES['survey'], data=request.FILES['data'], resized_survey=request.FILES['survey'])
-
 
         #1 save in-memory file
         survey_path = os.path.join(settings.MEDIA_ROOT, "survey")

@@ -1,35 +1,60 @@
-{% extends 'part1/base.html' %}
+{% load static %}
+<html>
+<head>
+    <title>PSAS</title>
+    <meta name="viewport" content="width-device-width", initial-scale="1">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="{% static 'css/blog.css' %}">
+    <link href="//fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+</head>
+<body>
 
-{% block content %}
-{% load staticfiles %}
-
+<div class="navbar navbar-inverse">
+    <p class="navbar-text" style="color:white;">Paper Survey Aggregation Service </p class="navbar-text">
+</div>
+<style type="text/css">
+    .jumbotron{
+        background-image: url("{% static 'gif\jumbo.jpg' %}");
+        background-size:cover;
+    }
+    .container {
+         margin: auto;
+         width: 100%;
+         padding: 10px;
+     }
+</style>
 <!-- Upload form. Note enctype attribute! -->
-<form action="{% url 'p1' %}" method="post" enctype="multipart/form-data" class="form-horizontal">
-    {% csrf_token %}
-    <div class="form-group">
-        <label for="title" class="col-sm-2 control-label">{{ form.title.label_tag }}</label>
-        <div class="col-sm-10">
-            {{ form.title }}
-        </div>
+<div class="jumbotron">
+    <div class="container">
+        <form action="{% url 'p1' %}" method="post" enctype="multipart/form-data" class="form-horizontal">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="title" class="col-sm-2 control-label">{{ form.title.label_tag }}</label>
+                <div class="col-sm-10">
+                    {{ form.title }}
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="survey" class="col-sm-2 control-label">{{ form.survey.label_tag }}</label>
+                <div class="col-sm-10">
+                    {{ form.survey }}
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="data" class="col-sm-2 control-label">{{ form.data.label_tag }}</label>
+                <div class="col-sm-10">
+                    {{ form.data }}
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <input type="submit" value="Upload" type="button" class="btn btn-default pull-right"/>
+                </div>
+            </div>
+        </form>
     </div>
-    <div class="form-group">
-        <label for="survey" class="col-sm-2 control-label">{{ form.survey.label_tag }}</label>
-        <div class="col-sm-10">
-            {{ form.survey }}
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="data" class="col-sm-2 control-label">{{ form.data.label_tag }}</label>
-        <div class="col-sm-10">
-            {{ form.data }}
-        </div>
-    </div>
-    <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-            <input type="submit" value="Upload" type="button" class="btn btn-default"/>
-        </div>
-    </div>
-</form>
 
-{% endblock %}
-
+</div>
+</body>
+</html>

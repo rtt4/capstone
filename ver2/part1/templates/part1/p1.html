@@ -4,121 +4,121 @@
 {% load staticfiles %}
 
 <form id="img_area_form">
-    <fieldset>
-        <legend>
-            <h3><a onclick="toggleFieldset(this.parentNode.parentNode)">Select source</a></h3>
-        </legend>
-        <!-- List of uploaded documents -->
-        {% if my_file %}
-        <ul>
-            <li><a href="{{ my_file.survey.url }}">{{ my_file.survey.name }}</a></li>
-        </ul>
-        {% else %}
-        <p>No documents.</p>
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title"><a onclick="toggleFieldset(this.parentNode.parentNode)"><span class="glyphicon glyphicon-inbox"></span>&nbsp;&nbsp;Select source</a></h3>
+        </div>
+        <div class="panel-body">
+            {% if my_file %}
+            <ul>
+                <li><a href="{{ my_file.survey.url }}">{{ my_file.survey.name }}</a></li>
+            </ul>
+            {% else %}
+            <p>No documents.</p>
 
-        {% endif %}
-        <div>
-            <!--<div class="source_desc">Use an image on your computer:</div>-->
-            <div class="source_url">
-                <div style="font: 10px Arial;">
-                    <a href="javascript:gui_loadImage(document.getElementById('src').getAttribute('value'))" class="btn btn-default">accept</a>
-                    <div id="upload_result" style="display: none;">Uploaded
-                        <span id="src" value={{ my_file.resized_survey.url }}> survey1.jpg의 사본.jpg </span>
-                        - <a href="javascript:showForm()">upload another</a>
-                    </div>
+            {% endif %}
+            <div class="media">
+                <a href="javascript:gui_loadImage(document.getElementById('src').getAttribute('value'))" class="btn btn-default btn-block">accept</a>
+                <div id="upload_result" style="display: none;">Uploaded
+                    <span id="src" value={{ my_file.resized_survey.url }}> survey1.jpg의 사본.jpg </span>
+                    - <a href="javascript:showForm()">upload another</a>
                 </div>
             </div>
         </div>
-    </fieldset>
-    <fieldset>
-        <legend>
-            <h3><a onclick="toggleFieldset(this.parentNode.parentNode)">Image map areas</a></h3>
-        </legend>
-        <div style="border-bottom: solid 1px #efefef">
+    </div>
 
-            <table cellspacing="0" width="100%">
-                <tr>
-                    <td width="110">
-                        <div id="button_container">
-                            <!-- buttons come here -->
-                            <img src="{% static 'gif\add.gif' %}" onclick="myimgmap.addNewArea()" alt="Add new area" title="Add new area"/>
-                            <img src="{% static 'gif\delete.gif' %}" onclick="myimgmap.removeArea(myimgmap.currentid)" alt="Delete selected area" title="Delete selected area"/>
-                            <img src="{% static 'gif\zoom.gif' %}" id="i_preview" onclick="myimgmap.togglePreview();" alt="Preview image map" title="Preview image map"/>
-                            <img src="{% static 'gif\html.gif' %}" onclick="gui_htmlShow()" alt="Get image map HTML" title="Get image map HTML"/>
-                        </div>
-                    </td>
-                    <td>
-                        <label for="dd_zoom">Zoom</label>:
-                        <select onchange="gui_zoom(this)" id="dd_zoom">
-                            <option value='0.25'>25%</option>
-                            <option value='0.5'>50%</option>
-                            <option value='1' selected="1">100%</option>
-                            <option value='2'>200%</option>
-                            <option value='3'>300%</option>
-                        </select>
-                        <label for="dd_output">Output</label>:
-                        <select id="dd_output" onchange="return gui_outputChanged(this)">
-                            <option value='imagemap'>Standard imagemap</option>
-                            <option value='css'>CSS imagemap</option>
-                            <option value='wiki'>Wiki imagemap</option>
-                        </select>
-                    </td>
-                    <td align="right" width="50%">
-                        <input type="checkbox" id="bb" onClick="toggleBoundingBox(this)"/> <label for="bb">bounding box</label>&nbsp;
-                        <select onchange="changelabeling(this)">
-                            <option value=''>No labeling</option>
-                            <option value='%n' selected='1'>Label with numbers</option>
-                            <option value='%a'>Label with alt text</option>
-                            <option value='%h'>Label with href</option>
-                            <option value='%c'>Label with coords</option>
-                        </select>
-                    </td>
-                </tr>
-            </table>
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title"><a onclick="toggleFieldset(this.parentNode.parentNode)"><span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;Image map areas</a></h3>
         </div>
-        <!--***********************default*************************-->
+        <div class="panel-body">
+            <div style="border-bottom: solid 1px #efefef">
 
-        <!--<div id="form_container" style="clear: both;">-->
-        <!--&lt;!&ndash; form elements come here &ndash;&gt;-->
-
-        <!--</div>-->
-
-        <!--*********************end default*************************-->
-
-        <form action="{% url 'p5' %}" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div id="form_container" style="clear: both;">
-                <!-- form elements come here -->
+                <table cellspacing="0" width="100%">
+                    <tr>
+                        <td width="110">
+                            <div id="button_container">
+                                <!-- buttons come here -->
+                                <img src="{% static 'gif\add.gif' %}" onclick="myimgmap.addNewArea()" alt="Add new area" title="Add new area"/>
+                                <img src="{% static 'gif\delete.gif' %}" onclick="myimgmap.removeArea(myimgmap.currentid)" alt="Delete selected area" title="Delete selected area"/>
+                                <img src="{% static 'gif\zoom.gif' %}" id="i_preview" onclick="myimgmap.togglePreview();" alt="Preview image map" title="Preview image map"/>
+                                <img src="{% static 'gif\html.gif' %}" onclick="gui_htmlShow()" alt="Get image map HTML" title="Get image map HTML"/>
+                            </div>
+                        </td>
+                        <td>
+                            <label for="dd_zoom">Zoom</label>:
+                            <select onchange="gui_zoom(this)" id="dd_zoom">
+                                <option value='0.25'>25%</option>
+                                <option value='0.5'>50%</option>
+                                <option value='1' selected="1">100%</option>
+                                <option value='2'>200%</option>
+                                <option value='3'>300%</option>
+                            </select>
+                            <label for="dd_output">Output</label>:
+                            <select id="dd_output" onchange="return gui_outputChanged(this)">
+                                <option value='imagemap'>Standard imagemap</option>
+                                <option value='css'>CSS imagemap</option>
+                                <option value='wiki'>Wiki imagemap</option>
+                            </select>
+                        </td>
+                        <td align="right" width="50%">
+                            <input type="checkbox" id="bb" onClick="toggleBoundingBox(this)"/> <label for="bb">bounding box</label>&nbsp;
+                            <select onchange="changelabeling(this)">
+                                <option value=''>No labeling</option>
+                                <option value='%n' selected='1'>Label with numbers</option>
+                                <option value='%a'>Label with alt text</option>
+                                <option value='%h'>Label with href</option>
+                                <option value='%c'>Label with coords</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
             </div>
+            <!--***********************default*************************-->
 
-            <input type="submit" value="Upload" type="button" class="btn btn-success"/>
-        </form>
+            <!--<div id="form_container" style="clear: both;">-->
+            <!--&lt;!&ndash; form elements come here &ndash;&gt;-->
 
-    </fieldset>
-    <fieldset>
-        <legend>
-            <h3><a onclick="toggleFieldset(this.parentNode.parentNode)">Image</a></h3>
-        </legend>
-        <div id="pic_container">
+            <!--</div>-->
+
+            <!--*********************end default*************************-->
+
+            <form action="{% url 'p5' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div id="form_container" style="clear: both;">
+                    <!-- form elements come here -->
+                </div>
+
+                <p></p>
+                <input type="submit" value="Upload" type="button" class="btn btn-success pull-right btn-block"/>
+            </form>
         </div>
-        <fieldset>
-            <legend>
-                <h3><a onclick="toggleFieldset(this.parentNode.parentNode)">Status</a></h3>
-            </legend>
-            <div id="status_container"></div>
-        </fieldset>
-        <fieldset id="fieldset_html">
-            <legend>
-                <h3><a onclick="toggleFieldset(this.parentNode.parentNode)">Code</a></h3>
-            </legend>
-            <div>
-                <div id="output_help"></div>
-                <textarea id="html_container"></textarea>
+    </div>
 
-            </div>
-        </fieldset>
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title"><a onclick="toggleFieldset(this.parentNode.parentNode)"><span class="glyphicon glyphicon-search"></span>&nbsp;&nbsp;Image</a></h3>
+        </div>
+    </div>
+    <div id="pic_container"></div>
 
-    </fieldset>
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title"><a onclick="toggleFieldset(this.parentNode.parentNode)"><span class="glyphicon glyphicon-stats"></span>&nbsp;&nbsp;Status</a></h3>
+        </div>
+        <div class="panel-body" id="status_container" ></div>
+    </div>
+
+    <div class="panel panel-primary" id="fieldset_html">
+        <div class="panel-heading">
+            <h3 class="panel-title"><a onclick="toggleFieldset(this.parentNode.parentNode)"><span class="glyphicon glyphicon-file"></span>&nbsp;&nbsp;Code</a></h3>
+        </div>
+        <div>
+            <div class="panel-body" id="output_help"></div>
+            <textarea id="html_container"></textarea>
+        </div>
+    </div>
+
 </form>
 
 <script src="https://sdk.amazonaws.com/js/aws-sdk-2.5.5.min.js"></script>

@@ -229,7 +229,7 @@ function gui_addArea(id) {
    myimgmap.addEvent(props[id], 'mouseover', gui_row_mouseover);
    myimgmap.addEvent(props[id], 'mouseout',  gui_row_mouseout);
    myimgmap.addEvent(props[id], 'click',     gui_row_click);
-   var temp = '<input type="text"  name="img_id" class="img_id" value="' + id + '" readonly="1"/>';
+   var temp = '<input type="text"  name="img_id" class="img_id" value="' + id + '" readonly="1" style="display: none"/>';
    //temp+= ' <input type="checkbox" name="img_active" class="img_active" id="img_active_'+id+'" value="'+id+'">';
    //could be checkbox in the future
    temp+= '<input type="radio" name="img_active" class="img_active" id="img_active_'+id+'" value="'+id+'">';
@@ -250,20 +250,20 @@ temp+= '<input type="text" name="img_coords" class="img_coords" value="" style="
 props[id].innerHTML = temp;
 temp = '';
 if(pid < 0){
-   temp+= '    Idx: <input type="text" name="img_alt" class="img_alt" value="0">';
+   temp+= '    Idx: <input type="text" name="img_alt" class="img_alt" value="0" style="display: none">';
    }
    else
    {
        if(props[id].getElementsByTagName("select")[1].value == 0)
        {
-           temp+= '    Idx: <input type="text" name="img_alt" class="img_alt" value="0">';
+           temp+= '    Idx: <input type="text" name="img_alt" class="img_alt" value="0" style="display: none">';
        }
        else{
        if(props[pid].getElementsByTagName("select")[1].value == 0)
        {
-          temp+= '    Idx: <input type="text" name="img_alt" class="img_alt" value="'+ pid +'">';
+          temp+= '    Idx: <input type="text" name="img_alt" class="img_alt" value="'+ pid +' " style="display: none">';
           var coord2 = props[pid].getElementsByTagName("input")[2].value;
-          var temp2 = '<input type="text"  name="img_id" class="img_id" value="' + pid + '" readonly="1"/>';
+          var temp2 = '<input type="text"  name="img_id" class="img_id" value="' + pid + '" readonly="1" style="display: none"/>';
    //temp+= ' <input type="checkbox" name="img_active" class="img_active" id="img_active_'+id+'" value="'+id+'">';
    //could be checkbox in the future
    temp2+= '<input type="radio" name="img_active" class="img_active" id="img_active_'+id+'" value="'+id+'">';
@@ -281,18 +281,18 @@ if(pid < 0){
    temp2+= '</select>';
 temp2+= '<input type="text" name="img_coords" class="img_coords" value="'+ coord2 +'" style="display: none">';;
    temp2+= ' <input type="text" name="img_href" class="img_href" value="" style="display: none">';
-             temp2+= '    Idx: <input type="text" name="img_alt" class="img_alt" value="0">';
+             temp2+= '    Idx: <input type="text" name="img_alt" class="img_alt" value="0" style="display: none">';
           props[pid].innerHTML ='';
           props[pid].innerHTML +=temp2;
        }
        else if(props[pid].getElementsByTagName("select")[1].value == 1)
        {
             var aaa = props[pid].getElementsByTagName("input")[3].value;
-             temp+= '    Idx: <input type="text" name="img_alt" class="img_alt" value="'+ aaa +'">';
+             temp+= '    Idx: <input type="text" name="img_alt" class="img_alt" value="'+ aaa +'" style="display: none">';
        }
        else
        {
-           temp+= '    Idx: <input type="text" name="img_alt" class="img_alt" value="0">';
+           temp+= '    Idx: <input type="text" name="img_alt" class="img_alt" value="0" style="display: none">';
        }
        }
    }
@@ -347,7 +347,8 @@ function gui_modeChanged(mode) {
       if (document.getElementById('html_container')) {
          document.getElementById('html_container').disabled = true;
       }
-      //disable form elements (inputs and selects)
+      //disable form elements (inputs and s
+      elects)
       nodes = document.getElementById('form_container').getElementsByTagName("input");
       for (i=0; i<nodes.length; i++) {
          nodes[i].disabled = true;
