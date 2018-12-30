@@ -3,14 +3,23 @@ import cv2
 import ast
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plts
+import matplotlib.pyplot as plt
 import os
+
+# parameter settings
+# for server visual effect, set
+visual = False
+# to True
+# for first
+first_test = True
+second_test = False
+
 
 class Preprocessor:
 
     def __init__(self, survey_original=None, survey_test=None, meta_data=None,
                  fixed_width=3 * 210, fixed_height=3 * 297):
-        app_root_path = r"C:\pyproject\capstone\ver2"
+        app_root_path = "../ver2"
         self.fixed_width = fixed_width
         self.fixed_height = fixed_height
         self.survey_original = None
@@ -51,11 +60,13 @@ class Preprocessor:
             w = xh - xl
             h = yh - yl
             ori = cv2.rectangle(ori, (xl, yl), (xl + w, yl + h), (0, 0, 255), 2)
-        cv2.imshow("debug_ori", ori)
-        cv2.imshow("debug_tst", tst)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-        self.img_blending()
+
+        if visual:
+            cv2.imshow("debug_ori", ori)
+            cv2.imshow("debug_tst", tst)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+            self.img_blending()
 
     def parse_search_space(self, filename):
         with open(filename, "r") as f:
@@ -84,67 +95,6 @@ class Preprocessor:
         self.questions_list = [(k, v) for k, v in self.questions.items()]
         self.questions_list = sorted(self.questions_list, key=lambda d: d[0])
 
-    def yfunc(self, xdata, img, ax):
-        ydata = list()
-        tmp_list = list()
-        if ax == 1:
-            tmp_list = img.T.copy()
-        else:
-            tmp_list = img.copy()
-
-        for line in xdata:
-            cnt = 0
-            for px in tmp_list[line]:
-                if px == 255:
-                    cnt += 1
-            ydata.append(cnt)
-        return ydata
-
-    def remove_border(self, img, ratio=0.97):
-        """Removes white borders of an image
-
-        :param img: image to remove white borders
-        :param ratio: parameter to adjust noise
-        :return:
-        """
-        height = img.shape[0]
-        width = img.shape[1]
-        left_bottom_x = 0
-        left_bottom_y = 0
-        w = 0
-        h = 0
-
-        # height cut
-        xdata = np.arange(0, height, 1, int)
-        ydata = self.yfunc(xdata, img, 0)
-
-        for idx, y in enumerate(ydata):
-            if y < width * ratio:
-                left_bottom_x = idx
-                break
-
-        for idx, y in enumerate(reversed(ydata)):
-            if y < width * ratio:
-                w = height - idx + left_bottom_x
-                break
-
-        # width cut
-        xdata = np.arange(0, width, 1, int)
-        ydata = self.yfunc(xdata, img, 1)
-
-        for idx, y in enumerate(ydata):
-            if y < height * ratio:
-                left_bottom_y = idx
-                break
-
-        for idx, y in enumerate(reversed(ydata)):
-            if y < height * ratio:
-                h = width - idx + left_bottom_y
-                break
-
-        print(left_bottom_x, left_bottom_y, w, h)
-        return left_bottom_x, left_bottom_y, w, h
-
     def img_resize(self, img, ratio):
         """Removes white borders of an image and resizes it to self.fixed_height * self.fixed_weight
 
@@ -153,26 +103,37 @@ class Preprocessor:
         """
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         _, th = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)
-        x, y, w, h = self.remove_border(th, ratio=ratio)
-        roi = img[x:x + w, y:y + h]
-        cv2.namedWindow("win", cv2.WINDOW_NORMAL)
-        cv2.resizeWindow("win", self.fixed_width, self.fixed_height)
-        cv2.imshow("win", roi)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
 
-        return cv2.resize(roi, (self.fixed_width, self.fixed_height), interpolation=cv2.INTER_NEAREST)
+        return cv2.resize(img, (self.fixed_width, self.fixed_height), interpolation=cv2.INTER_NEAREST)
 
     def img_blending(self):
         """Shows blended image of the original survey and the test survey
         """
-        cv2.namedWindow("dst", cv2.WINDOW_NORMAL)
-        cv2.resizeWindow("dst", self.fixed_width, self.fixed_height)
+
+        if visual:
+            cv2.namedWindow("dst", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow("dst", self.fixed_width, self.fixed_height)
         for test in self.survey_test:
             dst = cv2.addWeighted(test, 0.7, self.survey_original, 0.3, 0)
-            cv2.imshow("dst", dst)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
+            if visual:
+                cv2.imshow("dst", dst)
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
+
+    def compute_similarity(self, A, B):
+
+        # get white
+        A[A == 255] = 1
+        B[B == 255] = 1
+        white = np.multiply(A, B)
+
+        # get black
+        A[A == 0] = 2
+        B[B == 0] = 2
+        A[A == 1] = 0
+        B[B == 1] = 0
+        black = np.multiply(A, B)
+        return white.sum() + black.sum()
 
     def __displacement_fix_util(self, idx, th1, th2, ratio=0.4, use_white=False):
         """Adjust text block displacement between two images
@@ -192,16 +153,30 @@ class Preprocessor:
         delta_y = h
 
         x_begin = max(0, x - delta_x)
-        x_end = min(self.fixed_width, x + w + delta_x)
+        x_end = min(self.fixed_width - 1, x + w + delta_x)
         y_begin = max(0, y - delta_y)
-        y_end = min(self.fixed_height, y + h + delta_y)
+        y_end = min(self.fixed_height - 1, y + h + delta_y)
 
         roi1 = th1[y:y+h, x: x + w]
         roi2 = th2[y_begin: y_end, x_begin:x_end]
-        cv2.imshow("1", roi1)
-        cv2.imshow("2", roi2)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+
+        if visual:
+            cv2.imshow("1", roi1)
+            cv2.imshow("2", roi2)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+
+        if first_test:
+
+            th1 = cv2.bitwise_not(th1)
+            th2 = cv2.bitwise_not(th2)
+
+            kernel = np.ones((2, 2), np.uint8)
+            th1 = cv2.dilate(th1, kernel, iterations=1)
+            th2 = cv2.dilate(th2, kernel, iterations=1)
+
+            th1 = cv2.bitwise_not(th1)
+            th2 = cv2.bitwise_not(th2)
 
         flag = True
         xpos = None
@@ -217,66 +192,58 @@ class Preprocessor:
         else:
             pixel_cnt = w*h
 
-        for xpos in np.arange(x_begin, x_end, 1, int):
-            for ypos in np.arange(y_begin, y_end, 1, int):
-                cnt = 0
-                flag = True
-                for xdis in range(w):
-                    for ydis in range(h):
-                        if th1[y + ydis, x + xdis] == 255:
-                            continue
-                        if y + ydis >= self.fixed_height or ypos + ydis >= self.fixed_height or \
-                                x + xdis >= self.fixed_width or xpos + xdis >= self.fixed_width:
-                            continue
-                        if th1[y + ydis, x + xdis] != th2[ypos + ydis, xpos + xdis]:
-                            cnt += 1
-                            if cnt > ratio*pixel_cnt:
-                                flag = False
-                                break
-                    if flag is False:
-                        break
-                if flag:
-                    break
-            if flag:
-                break
+        max_score = -1
+        delx = 0
+        dely = 0
+        A = th1[y:y+h, x: x+w]
+        param = 1
+        if first_test:
+            param = 3
 
-        x_begin = xpos
-        x_end = xpos + w
-        y_begin = ypos
-        y_end = ypos + h
+        for xpos in np.arange(x_begin, x_end, param, int):
+            for ypos in np.arange(y_begin, y_end, param, int):
+                if xpos + w >= self.fixed_height or ypos + h >= self.fixed_height:
+                    continue
+                B = th2[ypos:ypos+h, xpos: xpos+w]
+                if A.shape != B.shape:
+                    B = cv2.resize(B, (A.shape[1], A.shape[0]), interpolation=cv2.INTER_NEAREST)
+                temp_score = self.compute_similarity(A.copy(), B.copy())
+                if temp_score > max_score:
+                    max_score = temp_score
+                    delx = xpos
+                    dely = ypos
+
+        x_begin = delx
+        x_end = delx + w
+        y_begin = dely
+        y_end = dely + h
         roi2 = th2[y_begin: y_end, x_begin:x_end]
-        cv2.imshow("1", roi1)
-        cv2.imshow("2", roi2)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-        return xpos - x, ypos - y
-
-    def draw_figure(self, x1, y1, x2, y2, w, h, th1, th2):
-        plt.figure()
-
-        # x coordinate
-        plt.subplot(2, 1, 1)
-        xdata1 = np.arange(x1, x1 + w, 1, int)
-        func_data1 = self.yfunc(xdata1, th1, 0)
-        plt.plot(xdata1, func_data1)
-
-        xdata2 = np.arange(x2, x2 + w, 1, int)
-        func_data2 = self.yfunc(xdata2, th2, 0)
-        plt.plot(xdata2, func_data2)
-
-        # y corrdinate
-        plt.subplot(2, 1, 2)
-        ydata1 = np.arange(y1, y1 + h, 1, int)
-        func_data1 = self.yfunc(ydata1, th1, 1)
-        plt.plot(ydata1, func_data1)
-
-        ydata2 = np.arange(y2, y2 + h, 1, int)
-        func_data2 = self.yfunc(ydata2, th2, 1)
-        plt.plot(ydata2, func_data2)
-
-        plt.show()
+        if visual:
+            cv2.imshow("1", roi1)
+            cv2.imshow("2", roi2)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+        return delx - x, dely - y
 
     def make_csv(self, csv_filename):
+        for test_num in range(len(self.survey_test)):
+            for q_idx, ele in enumerate(self.questions_list):
+                v = ele[1]
+                maxi_idx = -1
+                maxi_q_num = -1
+                maxi = -1
+                if v["type"] == 3:
+                    continue
+                for idx, item in enumerate(v["answers"]):
+                    q_num = item["idx"]
+                    tmp = self.test_questions_list[test_num][q_num]
+                    if tmp > maxi:
+                        maxi = tmp
+                        maxi_idx = idx
+                        maxi_q_num = q_num
+                self.block_dict[maxi_q_num]["cnt"] += 1
+                print("problem {}, answer: {}".format(q_idx + 1, maxi_idx + 1))
+
         max_sz = -1
         for k, v in self.questions.items():
             max_sz = max(max_sz, len(v["answers"]))
@@ -298,24 +265,6 @@ class Preprocessor:
         cols = cols[-1:] + cols[:-1]
         df = df[cols]
         df.to_csv(csv_filename, index=False, encoding='utf-8-sig')
-
-    def print_answers(self, test_num):
-        for q_idx, ele in enumerate(self.questions_list):
-            v = ele[1]
-            maxi_idx = -1
-            maxi_q_num = -1
-            maxi = -1
-            if v["type"] == 3:
-                continue
-            for idx, item in enumerate(v["answers"]):
-                q_num = item["idx"]
-                tmp = self.test_questions_list[test_num][q_num]
-                if tmp > maxi:
-                    maxi = tmp
-                    maxi_idx = idx
-                    maxi_q_num = q_num
-            self.block_dict[maxi_q_num]["cnt"] += 1
-            print("problem {}, answer: {}".format(q_idx + 1, maxi_idx + 1))
 
     def classification(self, diff, img, test_num, q_num):
         image, contours, hierarchy = cv2.findContours(diff, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -347,23 +296,22 @@ class Preprocessor:
         x2 = x + xdis
         y2 = y + ydis
         y1_begin = max(0, y - border)
-        y1_end = min(self.fixed_height, y+h+border)
+        y1_end = min(self.fixed_height - 1, y+h+border)
         x1_begin = max(0, x - border)
-        x1_end = min(self.fixed_width, x + w + border)
+        x1_end = min(self.fixed_width - 1, x + w + border)
         y2_begin = max(0, y2 - border)
-        y2_end = min(self.fixed_height, y2+h+border)
+        y2_end = min(self.fixed_height - 1, y2+h+border)
         x2_begin = max(0, x2 - border)
-        x2_end = min(self.fixed_width, x2 + w + border)
+        x2_end = min(self.fixed_width - 1, x2 + w + border)
 
-
-        roi1 = th1[max(0, y - border): min(self.fixed_height, y+h+border),
-               max(0, x - border): min(self.fixed_width, x + w + border)]
-        roi2 = th2[max(0, y2 - border): min(self.fixed_height, y2+h+border),
-               max(0, x2 - border): min(self.fixed_width, x2 + w + border)]
+        roi1 = th1[max(0, y - border): min(self.fixed_height - 1, y+h+border),
+               max(0, x - border): min(self.fixed_width - 1, x + w + border)]
+        roi2 = th2[max(0, y2 - border): min(self.fixed_height - 1, y2+h+border),
+               max(0, x2 - border): min(self.fixed_width - 1, x2 + w + border)]
         if roi1.shape != roi2.shape:
             roi2 = cv2.resize(roi2, (roi1.shape[1], roi1.shape[0]), interpolation=cv2.INTER_NEAREST)
         diff = cv2.subtract(roi1, roi2)
-        diff, rec = self.noise_elimination(diff, self.survey_test[idx][y2_begin:y2_end, x2_begin: x2_end], idx, q_num)
+        diff, rec = self.noise_elimination(diff, self.survey_test[idx][y2_begin:y2_end, x2_begin:x2_end], idx, q_num)
         diff_width = diff.shape[1]
         diff_height = diff.shape[0]
         diff = diff[border: diff_height-border, border: diff_width-border]
@@ -375,12 +323,13 @@ class Preprocessor:
                 if diff[i, j] == 255:
                     pixel_cnt += 1
         self.test_questions_list[idx][q_num] = pixel_cnt
-        cv2.imshow("ori", roi1)
-        cv2.imshow("tst", roi2)
-        cv2.imshow("diff", diff)
-        cv2.imshow("draw_rec", rec)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        if visual:
+            cv2.imshow("ori", roi1)
+            cv2.imshow("tst", roi2)
+            cv2.imshow("diff", diff)
+            cv2.imshow("draw_rec", rec)
+            cv2.waitKey(50)
+            cv2.destroyAllWindows()
 
     def __draw_rec2(self, idx, xdis, ydis):
         w = self.block_dict[idx]["w"]
@@ -405,7 +354,7 @@ class Preprocessor:
             for k, v in self.block_dict.items():
                 # Check whether or not if it's a question
                 if v["type"] is 0 or v["type"] is 3:
-                    xdis, ydis = self.__displacement_fix_util(k, th1, th2, ratio=0.45)
+                    xdis, ydis = self.__displacement_fix_util(k, th1, th2, ratio=0.5)
                 #else:
                     #xdis, ydis = self.__displacement_fix_util(k, th1, th2, ratio=0.05, use_white=True)
                 #self.__draw_rec2(k, xdis, ydis)
@@ -506,13 +455,15 @@ class Preprocessor:
                 bag_idx += 1
             sent_idx += 1
 
+        print(self.questions_list)
         for question in self.questions_list:
             print(question)
             self.questions_text_list.append(question[1]["question"])
 
 
 if __name__ == "__main__":
-    app_root_path = r"C:\Users\inha\Desktop\Projects\capstone_proto"
+    # app_root_path = "C:/pyproject/capstone"
+    app_root_path = ".."
     meta_txt = r"tmp.txt"
     ocr_file = r"OCR_result.json"
     ori_jpg = r"ori.jpg"

@@ -1,0 +1,45 @@
+{% extends 'part1/base.html' %}
+
+{% block content %}
+{% load staticfiles %}
+
+<style type="text/css">
+.jumbotron{
+    background-image: url("{% static 'gif\jumbo.jpg' %}");
+    background-size:cover;
+}
+</style>
+
+<!-- Upload form. Note enctype attribute! -->
+<div class="jumbotron">
+    <div class="container">
+        <form action="{% url 'p1' %}" method="post" enctype="multipart/form-data" class="form-horizontal">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="title" class="col-sm-2 control-label">{{ form.title.label_tag }}</label>
+                <div class="col-sm-10">
+                    {{ form.title }}
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="survey" class="col-sm-2 control-label">{{ form.survey.label_tag }}</label>
+                <div class="col-sm-10">
+                    {{ form.survey }}
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="data" class="col-sm-2 control-label">{{ form.data.label_tag }}</label>
+                <div class="col-sm-10">
+                    {{ form.data }}
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <input type="submit" value="Upload" type="button" class="btn btn-default pull-right"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

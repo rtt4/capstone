@@ -1,0 +1,32 @@
+{% load static %}
+<html>
+<head>
+    <title>PSAS</title>
+    <meta name="viewport" content="width-device-width", initial-scale="1">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+
+    <script language="javascript" type="text/javascript" src="{% static 'js/AIRIntrospector.js' %}"></script>
+    <script language="javascript" type="text/javascript" src="{% static 'js/AIRAliases.js' %}"></script>
+    <script language="javascript" type="text/javascript" src="{% static 'js/imgmap_packed.js' %}"></script>
+    <script language="javascript" type="text/javascript" src="{% static 'js/default_interface3.js' %}"></script>
+
+</head>
+<body>
+<style type="text/css">
+.container {
+     margin: auto;
+     width: 100%;
+     padding: 10px;
+}
+</style>
+<div class="navbar navbar-inverse">
+    <h2 class="navbar-text" style="font-family: 'Ubuntu';">Check Finder</h2>
+</div>
+<p></p>
+{% block content %}
+{% endblock %}
+</body>
+</html>

@@ -1,10 +1,5 @@
 {% load staticfiles %}
 
-@import url(http://fonts.googleapis.com/earlyaccess/nanumgothic.css);
-.{
-	font-family: 'Nanum Gothic';
-}
-
 .page-header {
     background-color: #ff9400;
     margin-top: 0;

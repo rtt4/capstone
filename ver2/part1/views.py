@@ -15,7 +15,6 @@ def p0(request):
     form = SurveyForm()
     return render(request, 'part1/p0.html', {'form': form})
 
-
 def p1(request):
     if request.method == "POST":
         # newFile = MetaSurvey(title= request.POST['title'], survey=request.FILES['survey'], data=request.FILES['data'], resized_survey=request.FILES['survey'])
@@ -24,30 +23,11 @@ def p1(request):
         survey_path = os.path.join(settings.MEDIA_ROOT, "survey")
         f = request.FILES['survey']
         print('type(f): ', type(f))
-        # f_path = os.path.join(settings.MEDIA_ROOT, default_storage.save('temp_resized_survey.jpeg', ContentFile(f.read())))
-        # print('f_path: ', f_path)
-
-        # 동일한 이름의 파일이 있는 경우엔 어떻게 처리?
-        # f = os.path.join(survey_path, 'temp_resized_survey.jpeg')
-        # if not os.path.is_file(f):
-        #     os.path.join(settings.MEDIA_ROOT, default_storage.save('temp_resized_survey.jpeg', ContentFile(f.read())) )
-
-        # sp = Preprocessor()
-        # sp.load_original(f_path)
-        # resized_img = sp.survey_original
-        # cv2.imwrite(f_path, resized_img)
-        # print('type: ', type(resized_img))  # <class 'numpy.ndarray'>
-        # temp_path = os.path.join(settings.MEDIA_ROOT, 'resized_survey.jpeg')
-        # scipy.misc.imsave(temp_path, resized_img)
-
 
         #2 after saving, parsing the ~resized.jpeg file
         form = MetaSurvey(title=request.POST['title'], survey=request.FILES['survey'], data=request.FILES['data'])
         form.save() # 데이터베이스에 저장한 뒤에야 ~resized.jpeg 파일이 생성된다. => 디비에 따로 저장해야 p1에서 사용.
         print('pk: ', form.pk)
-
-        # form = SurveyForm(request.POST, request.FILES)
-        # form = form.save(commit=False)
 
         print(form.survey.name.split("/"))
         survey_file_name = form.survey.name.split("/")[-1]
@@ -68,23 +48,7 @@ def p1(request):
         f.close()
         print('form type: ', type(form))
 
-        # error: context must be a dict rather than set.
-
-        # field = FieldFile(f, MetaSurvey.resized_survey, MetaSurvey.resized_survey.name)
-        # print(field)
-        # print('type: ', field)
-        # resized_survey_file = InMemoryUploadedFile(f, MetaSurvey.resized_survey.name, 'resized_survey_file', "JPEG", None, os.path.getsize(file_path))
-
-        # form.resized_survey = resized_survey_file
-        # form = MetaSurvey(title=request.POST['title'], survey=request.FILES['survey'], data=request.FILES['data'], resized_survey=resized_survey_file)
-        # form = MetaSurvey.objects.get(pk=form.pk)
-        # form.delete()
-        # form.resized_survey=resized_survey_file
-        # form.save()  # 데이터베이스에 저장.
-
         context = {'my_file': form,}
-
-        my_file = form
         return render(request, 'part1/p1.html', context)
     else:
         myDict = dict(request.GET)
@@ -110,9 +74,6 @@ def p5(request):
     origianl_survey = temp.survey.path
     test_survey = temp.data.path
 
-    # print('original_survey: ', origianl_survey)
-    # print('test_survey: ', test_survey)
-
     # unzip
     test_list = []
     with zipfile.ZipFile(test_survey, 'r') as zip_ref:
@@ -129,27 +90,19 @@ def p5(request):
             filename = os.path.join(new_dir, filename)
             test_list.append(filename)
 
-    # list 'test_file' 출력해서 확인
-    # print('type: ', type(test_list))
-    # for test_file in test_list:
-    #     print(type(test_file), ', test_file: ', test_file)
-
     sp = Preprocessor(origianl_survey, test_list, meta)
 
     ocr_json_path = os.path.join(app_root_path, "OCR_result.json")
     ocr_ori = os.path.join(app_root_path, "ocr_ori.jpg")
     detect_text(ocr_ori, ocr_json_path)
-    #sp.debug()
     sp.load_original_survey_ocr(ocr_json_path)
 
     sp.displacement_fix()
     csv_filename = os.path.join(app_root_path, "result_csv.csv")
-    sp.print_answers(0)
+    # sp.print_answers(0)
     sp.make_csv(csv_filename)
 
-    # print('csv_filename: ', csv_filename)
     return render(request, 'part1/p5.html', {'csv_path':csv_filename})
-
 
 def download(request):
     path = "../ver2/result_csv.csv"

@@ -1,0 +1,20 @@
+{% extends 'part1/base.html' %}
+
+{% block content %}
+{% load staticfiles %}
+
+<style type="text/css">
+.jumbotron{
+    background-image: url("{% static 'gif\cloud.png' %}");
+    background-size:cover;
+}
+</style>
+<!-- Upload form. Note enctype attribute! -->
+<div class="jumbotron">
+    <div class="container" style="font-family: 'Ubuntu';">
+        <h2><a href='{% url "download" %}'>DOWNLOAD</a></h2>
+    </div>
+</div>
+<a a href="{% url 'p0' %}" class="btn btn-default btn-block">back to start</a>
+
+{% endblock %}
